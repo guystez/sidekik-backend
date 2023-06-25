@@ -1,0 +1,158 @@
+# def search(request):
+#     customer_input = request.data.get('customer_input')
+#     result = Conversation.objects.all()
+#     database_phrases = [conversation.chat for conversation in result]
+
+#     # Compute TF-IDF vectors for phrases in database and user input
+#     tfidf = TfidfVectorizer()
+#     database_vectors = tfidf.fit_transform(database_phrases)
+#     user_vector = tfidf.transform([customer_input])
+
+#     # Compute cosine similarities between user input and phrases in database
+#     similarities = cosine_similarity(user_vector, database_vectors)[0]
+
+#     # Find index of phrase with highest cosine similarity
+#     most_similar_index = similarities.argmax()
+
+#     # Get most similar phrase from database
+#     most_similar_phrase = database_phrases[most_similar_index]
+#     most_similar_phrase = most_similar_phrase.replace('Q', 'בחורה:')
+#     most_similar_phrase = most_similar_phrase.replace('K', 'גבר:')
+#     most_similar_phrase = most_similar_phrase.replace('W', 'woman:')
+#     most_similar_phrase = most_similar_phrase.replace('M', 'man:')
+
+#     # Split the most similar phrase into sentences based on "woman," "man," "גבר," and "בחורה"
+#     sentences = re.split(r'(?:woman|man|גבר|בחורה)', most_similar_phrase)
+    
+#     # Compute cosine similarities between user input and sentences in the most similar phrase
+#     sentence_similarities = cosine_similarity(tfidf.transform(sentences), user_vector).flatten()
+
+#     # Find index of sentence with highest cosine similarity
+#     most_similar_sentence_index = sentence_similarities.argmax()
+
+#     # Get the most similar sentence from the most similar phrase
+#     emphasized_sentence = sentences[most_similar_sentence_index].strip()
+
+#     # Emphasize the most similar sentence in the most similar phrase
+#     emphasized_phrase = re.sub(re.escape(emphasized_sentence), f"<b>{emphasized_sentence}</b>", most_similar_phrase)
+
+#     if request.method == 'POST':
+#         serializer = ConversationSerializer(data=request.data)
+#         if serializer.is_valid():
+#             emphasized_phrase = str(emphasized_phrase)
+            
+#             return Response(emphasized_phrase, status=status.HTTP_201_CREATED)
+#         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+
+###################################################################################################################################################### working code that giving bold correct and the next result:
+
+
+# last_similar_indices = []
+
+
+
+# # @login_required
+# @api_view(['POST'])
+# def search(request):
+#     global last_similar_indices
+
+#     customer_input = request.data.get('customer_input')
+#     result = Conversation.objects.all()
+#     database_phrases = [conversation.chat for conversation in result]
+
+#     # Compute TF-IDF vectors for phrases in database and user input
+#     tfidf = TfidfVectorizer()
+#     database_vectors = tfidf.fit_transform(database_phrases)
+#     user_vector = tfidf.transform([customer_input])
+
+#     # Compute cosine similarities between user input and phrases in database
+#     similarities = cosine_similarity(user_vector, database_vectors)[0]
+
+#     # Sort the similarities in descending order and get the indices
+#     sorted_indices = similarities.argsort()[::-1]
+
+#     # Find the index of the next most similar phrase excluding the last remembered ones
+#     next_similar_index = None
+#     for i in sorted_indices:
+#         if i not in last_similar_indices:
+#             next_similar_index = i
+#             break
+
+#     if next_similar_index is None:
+#         # Reset the remembered indices if all similar phrases have been returned
+#         last_similar_indices = []
+
+#         # Get the index of the next most similar phrase
+#         next_similar_index = sorted_indices[0]
+
+#     # Add the current index to the list of remembered indices
+#     last_similar_indices.append(next_similar_index)
+
+#     # Get the most similar phrase from the database
+#     most_similar_phrase = database_phrases[next_similar_index]
+#     most_similar_phrase = most_similar_phrase.replace('Q', 'בחורה:')
+#     most_similar_phrase = most_similar_phrase.replace('K', 'גבר:')
+#     most_similar_phrase = most_similar_phrase.replace('W', 'woman:')
+#     most_similar_phrase = most_similar_phrase.replace('M', 'man:')
+
+#     # Split the most similar phrase into sentences based on "woman," "man," "גבר," and "בחורה"
+#     sentences = re.split(r'(?:woman|man|גבר|בחורה)', most_similar_phrase)
+
+#     # Compute cosine similarities between user input and sentences in the most similar phrase
+#     sentence_vectors = tfidf.transform(sentences)
+#     sentence_similarities = cosine_similarity(sentence_vectors, user_vector).flatten()
+
+#     # Find index of sentence with highest cosine similarity
+#     most_similar_sentence_index = sentence_similarities.argmax()
+
+#     # Get the most similar sentence from the most similar phrase
+#     emphasized_sentence = sentences[most_similar_sentence_index].strip()
+
+#     # Emphasize the most similar sentence in the most similar phrase
+#     emphasized_phrase = most_similar_phrase.replace(emphasized_sentence, f"<b>{emphasized_sentence}</b>")
+
+#     if request.method == 'POST':
+#         serializer = ConversationSerializer(data=request.data)
+#         if serializer.is_valid():
+#             emphasized_phrase = str(emphasized_phrase)
+            
+#             return Response(emphasized_phrase, status=status.HTTP_201_CREATED)
+#         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+
+
+
+
+########################################################### func get cart of user:
+#  if request.method == 'GET': #list products
+        
+#         user_name = request.query_params.get('user')
+#         users=User.objects.all()
+#         # print(users)
+#         for user in users:
+#             # print(user.id, user.username)
+#             if user_name == user.username:
+#                 # print(user.username)
+#                 carts = Cart_new.objects.all()
+#                 for cart in carts:
+#                     if user.id == cart.user_id:
+#                         # print(user.id,cart.chat_id)
+#                         chats= Conversation.objects.all()
+#                         for chat in chats:
+#                             if cart.chat_id == chat.id:
+#                                 print(chat.chat,'qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq')
+#                                 final= chat.chat
+#                                 final_ls.append(final)
+#         # user = User.objects.filter(username=user_name).first()
+#         cart = Cart_new.objects.filter(user_id=user.id).values()
+#         chat_found= Conversation.objects.filter(chat=final)
+#         print(chat_found,'gggggggggggggggg')
+#         # user = request.user  # Access the logged-in user from the request
+#         carts = Cart_new.objects.all()
+#         # request.session['cart_id'] = carts.id
+#         # print(final_ls,'hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh')
+#         serializer = CartSerializer(chat_found, many=True)
+#         return Response(serializer.data)
